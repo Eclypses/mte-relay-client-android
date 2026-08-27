@@ -1,0 +1,235 @@
+
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android' version '1.9.24'
+    id 'maven-publish'
+    id 'signing'
+    id 'jacoco'
+}
+
+// One source of truth for the version: the published artifact and the value the
+// library reports through getRelayGlobalSettings() both read this. Must be
+// declared before android{} so buildConfigField can read it.
+ext.relayVersion = '5.2.2'
+
+android {
+    namespace 'com.eclypses.relay'
+    compileSdk 34
+
+    defaultConfig {
+        minSdk 28
+        targetSdk 34
+        versionCode 1
+        versionName project.ext.relayVersion
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        // Shipped inside the AAR and auto-applied by any consuming app's R8 pass.
+        // Keeps the reflectively-accessed legacy Pair/DecodeResult so minified
+        // consumer builds don't crash on the first relay request. See the file.
+        consumerProguardFiles 'consumer-rules.pro'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    buildFeatures {
+        // Generates com.eclypses.relay.BuildConfig (DEBUG flag), replacing the removed Volley BuildConfig.
+        buildConfig true
+    }
+
+    defaultConfig {
+        // The library reports its own version through getRelayGlobalSettings(), so it
+        // must come from the one place the version is actually set. Hand-maintaining a
+        // copy in source drifts — this constant sat at 5.0.0 through the 5.1.0 release.
+        buildConfigField "String", "RELAY_VERSION", "\"${project.ext.relayVersion}\""
+    }
+
+    testOptions {
+        unitTests {
+            returnDefaultValues = true
+            all {
+                useJUnitPlatform()
+            }
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = '11'
+    }
+
+    // Sources + Javadoc jars are required by the Maven Central Portal.
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
+
+}
+
+dependencies {
+    implementation 'com.eclypses:mte-client-android:4.2.1'
+
+    implementation 'org.apache.commons:commons-lang3:3.14.0'
+    implementation 'org.slf4j:slf4j-api:2.0.9'
+    implementation 'com.github.tony19:logback-android:3.0.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+
+    testImplementation platform('org.junit:junit-bom:5.10.2')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.jetbrains.kotlin:kotlin-test:1.9.24'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1'
+
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test:runner:1.5.2'
+    androidTestImplementation 'junit:junit:4.13.2'
+}
+
+jacoco {
+    toolVersion = '0.8.12'
+}
+
+def coverageExclusions = [
+        '**/R.class',
+        '**/R$*.class',
+        '**/BuildConfig.*',
+        '**/Manifest*.*',
+        '**/*Test*.*',
+        'android/**/*.*',
+        '**/*$Companion*.*',
+        '**/*$Lambda$*.*',
+        '**/*$inlined$*.*',
+        // Native-MTE-only classes: they construct MteMkeEnc/Dec / call MteBase.initLicense,
+        // so JVM unit tests cannot exercise them — they are covered by the instrumented
+        // (emulator) tests instead. Excluded from the UNIT coverage denominator so the gate
+        // measures the genuinely unit-testable surface. See dev_docs / the logging convention.
+        '**/Relay.class',
+        '**/Pair.class'
+]
+
+def minLineCoverage = (project.findProperty('minLineCoverage') ?: '0.70').toBigDecimal()
+
+tasks.register('jacocoUnitTestReport', JacocoReport) {
+    dependsOn tasks.named('testDebugUnitTest')
+
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+    }
+
+    def javaDebugTree = fileTree(dir: "$buildDir/intermediates/javac/debug/compileDebugJavaWithJavac/classes", excludes: coverageExclusions)
+    def javaDebugLegacyTree = fileTree(dir: "$buildDir/intermediates/javac/debug/classes", excludes: coverageExclusions)
+    def kotlinDebugTree = fileTree(dir: "$buildDir/tmp/kotlin-classes/debug", excludes: coverageExclusions)
+    classDirectories.setFrom(files([javaDebugTree, kotlinDebugTree]))
+    classDirectories.from(files([javaDebugLegacyTree]))
+
+    sourceDirectories.setFrom(files([
+            "$projectDir/src/main/java",
+            "$projectDir/src/main/kotlin"
+    ]))
+
+    executionData.setFrom(files([
+            "$buildDir/jacoco/testDebugUnitTest.exec",
+            "$buildDir/outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec"
+    ]))
+}
+
+tasks.register('jacocoUnitTestCoverageVerification', JacocoCoverageVerification) {
+    dependsOn tasks.named('jacocoUnitTestReport')
+
+    def javaDebugTree = fileTree(dir: "$buildDir/intermediates/javac/debug/compileDebugJavaWithJavac/classes", excludes: coverageExclusions)
+    def javaDebugLegacyTree = fileTree(dir: "$buildDir/intermediates/javac/debug/classes", excludes: coverageExclusions)
+    def kotlinDebugTree = fileTree(dir: "$buildDir/tmp/kotlin-classes/debug", excludes: coverageExclusions)
+    classDirectories.setFrom(files([javaDebugTree, kotlinDebugTree]))
+    classDirectories.from(files([javaDebugLegacyTree]))
+    sourceDirectories.setFrom(files([
+            "$projectDir/src/main/java",
+            "$projectDir/src/main/kotlin"
+    ]))
+    executionData.setFrom(files([
+            "$buildDir/jacoco/testDebugUnitTest.exec",
+            "$buildDir/outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec"
+    ]))
+
+    violationRules {
+        rule {
+            element = 'BUNDLE'
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = minLineCoverage
+            }
+        }
+    }
+}
+
+group = 'com.eclypses'
+version = project.ext.relayVersion
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+
+                groupId = 'com.eclypses'
+                artifactId = 'mte-relay-client-android'
+                version = project.ext.relayVersion
+
+                pom {
+                    name = 'MTE Relay Android Client Library'
+                    description = 'MteRelay: Android Client Library for MTE Relay'
+                    url = 'https://github.com/Eclypses/mte-relay-client-android'
+                    inceptionYear = '2024'
+
+                    licenses {
+                        license {
+                            name = 'MIT License'
+                            url = 'https://opensource.org/licenses/MIT'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'eclypses'
+                            name = 'Eclypses, Inc.'
+                            email = 'info@eclypses.com'
+                        }
+                    }
+                    scm {
+                        connection = 'scm:git:git://github.com/Eclypses/mte-relay-client-android.git'
+                        developerConnection = 'scm:git:ssh://github.com/Eclypses/mte-relay-client-android.git'
+                        url = 'https://github.com/Eclypses/mte-relay-client-android'
+                    }
+                }
+            }
+        }
+        repositories {
+            // Local staging repo; the pipeline zips this and uploads it to the
+            // Central Portal Publisher API (see scripts/publish_to_central.sh).
+            maven {
+                name = 'localBundle'
+                url = layout.buildDirectory.dir("central-bundle")
+            }
+        }
+    }
+
+    signing {
+        // CI passes the GPG key via ORG_GRADLE_PROJECT_signingKey (from the
+        // mte-signing-key.asc secure file) + signingPassword. Absent locally → no signing.
+        def signingKey = findProperty("signingKey")
+        if (signingKey) {
+            useInMemoryPgpKeys(signingKey.toString(), findProperty("signingPassword")?.toString())
+            sign publishing.publications.release
+        }
+    }
+}
