@@ -1,0 +1,23 @@
+{
+  "close": [
+    {"name": "1000 drain", "hex": "03e8647261696e", "expect": {"code": 1000, "reason": "drain"}},
+    {"name": "tcp zero code no reason", "hex": "0000", "expect": {"code": 0, "reason": ""}},
+    {"name": "4073 decode_failed", "hex": "0fe96465636f64655f6661696c6564", "expect": {"code": 4073, "reason": "decode_failed"}},
+    {"name": "one byte", "hex": "03", "error": "payload"}
+  ],
+  "ping": [
+    {"name": "eight bytes", "hex": "0001020304050607", "expect": "0001020304050607"},
+    {"name": "seven bytes", "hex": "00010203040506", "error": "payload"},
+    {"name": "nine bytes", "hex": "000102030405060708", "error": "payload"}
+  ],
+  "open": [
+    {"name": "keys sorted, pair re canonicalized", "input": "{\"pair\":{\"pairId\":\"x\",\"encoderPublicKey\":\"k\"},\"host\":\"a.b\",\"clientId\":\"t\"}", "canonical": "{\"clientId\":\"t\",\"host\":\"a.b\",\"pair\":{\"encoderPublicKey\":\"k\",\"pairId\":\"x\"}}"},
+    {"name": "missing pair", "input": "{\"host\":\"a.b\",\"clientId\":\"t\"}", "error": "payload"},
+    {"name": "missing host", "input": "{\"pair\":{},\"clientId\":\"t\"}", "error": "payload"},
+    {"name": "duplicate key", "input": "{\"pair\":{},\"host\":\"a\",\"host\":\"b\",\"clientId\":\"t\"}", "error": "payload"}
+  ],
+  "open_ack": [
+    {"name": "pair re canonicalized", "input": "{\"pair\":{\"pairId\":\"x\",\"decoderSecret\":\"s\"}}", "canonical": "{\"pair\":{\"decoderSecret\":\"s\",\"pairId\":\"x\"}}"},
+    {"name": "missing pair", "input": "{}", "error": "payload"}
+  ]
+}

@@ -1,0 +1,207 @@
+{
+  "_": "Frame version 2 on the WebSocket transport. Every case here is a rule that was found missing rather than a rule that was already held: the flag rules of errata E1 and E2, the one frame per message mapping, the fragment run of E3, and the close code mapping of W10 and W10a. Kinds and flag bits are the numeric values from spec/registry.md. Transports are the three names wire.Transport prints.",
+
+  "flags": [
+    {"name": "end and more together on a ws DATA", "kind": 2, "flags": 3, "length": 8, "transport": "ws", "error": "payload"},
+    {"name": "end and more together on an http DATA", "kind": 2, "flags": 3, "length": 8, "transport": "http", "error": "payload"},
+    {"name": "end and more together on a tcp DATA", "kind": 2, "flags": 3, "length": 8, "transport": "tcp", "error": "payload"},
+    {"name": "end alone on a ws DATA", "kind": 2, "flags": 1, "length": 8, "transport": "ws", "error": "payload"},
+    {"name": "end alone on a ws REQUEST", "kind": 0, "flags": 1, "length": 40, "transport": "ws", "error": "payload"},
+    {"name": "end alone on a ws RESPONSE", "kind": 1, "flags": 1, "length": 12, "transport": "ws", "error": "payload"},
+    {"name": "end and text together on a ws DATA", "kind": 2, "flags": 5, "length": 8, "transport": "ws", "error": "payload"},
+    {"name": "end on a ws CLOSE", "kind": 6, "flags": 1, "length": 7, "transport": "ws", "error": "payload"},
+    {"name": "end on an http DATA", "kind": 2, "flags": 1, "length": 8, "transport": "http"},
+    {"name": "end on an http REQUEST", "kind": 0, "flags": 1, "length": 40, "transport": "http"},
+    {"name": "end on an http RESPONSE", "kind": 1, "flags": 1, "length": 12, "transport": "http"},
+    {"name": "end on a tcp DATA", "kind": 2, "flags": 1, "length": 8, "transport": "tcp"},
+    {"name": "end on a tcp REQUEST", "kind": 0, "flags": 1, "length": 40, "transport": "tcp"},
+    {"name": "end on a tcp RESPONSE", "kind": 1, "flags": 1, "length": 12, "transport": "tcp"},
+
+    {"name": "length 0 DATA carrying more", "kind": 2, "flags": 2, "length": 0, "transport": "ws", "error": "payload"},
+    {"name": "length 0 DATA carrying text", "kind": 2, "flags": 4, "length": 0, "transport": "ws", "error": "payload"},
+    {"name": "length 0 DATA carrying more and text", "kind": 2, "flags": 6, "length": 0, "transport": "ws", "error": "payload"},
+    {"name": "length 0 DATA carrying nothing", "kind": 2, "flags": 0, "length": 0, "transport": "ws"},
+    {"name": "length 0 DATA carrying nothing on http", "kind": 2, "flags": 0, "length": 0, "transport": "http"},
+    {"name": "length 0 DATA carrying nothing on tcp", "kind": 2, "flags": 0, "length": 0, "transport": "tcp"},
+    {"name": "length 0 DATA carrying half on tcp", "kind": 2, "flags": 8, "length": 0, "transport": "tcp", "error": "payload"},
+
+    {"name": "a fragment", "kind": 2, "flags": 2, "length": 1024, "transport": "ws"},
+    {"name": "a text fragment", "kind": 2, "flags": 6, "length": 1024, "transport": "ws"},
+    {"name": "a text run terminator", "kind": 2, "flags": 4, "length": 12, "transport": "ws"},
+    {"name": "more on http", "kind": 2, "flags": 2, "length": 8, "transport": "http", "error": "payload"},
+    {"name": "more on tcp", "kind": 2, "flags": 2, "length": 8, "transport": "tcp", "error": "payload"},
+    {"name": "text on http", "kind": 2, "flags": 4, "length": 8, "transport": "http", "error": "payload"},
+    {"name": "text on tcp", "kind": 2, "flags": 4, "length": 8, "transport": "tcp", "error": "payload"},
+    {"name": "half on ws", "kind": 2, "flags": 8, "length": 8, "transport": "ws", "error": "payload"},
+    {"name": "half on http", "kind": 2, "flags": 8, "length": 8, "transport": "http", "error": "payload"},
+    {"name": "half on tcp", "kind": 2, "flags": 8, "length": 8, "transport": "tcp"},
+
+    {"name": "more on a ws REQUEST", "kind": 0, "flags": 2, "length": 40, "transport": "ws", "error": "payload"},
+    {"name": "text on a ws RESPONSE", "kind": 1, "flags": 4, "length": 12, "transport": "ws", "error": "payload"},
+    {"name": "a ws REQUEST with no flags", "kind": 0, "flags": 0, "length": 40, "transport": "ws"},
+    {"name": "a ws RESPONSE with no flags", "kind": 1, "flags": 0, "length": 12, "transport": "ws"},
+    {"name": "more on a ws ERROR", "kind": 3, "flags": 2, "length": 28, "transport": "ws", "error": "payload"},
+    {"name": "text on a ws OPEN", "kind": 4, "flags": 4, "length": 4096, "transport": "ws", "error": "payload"},
+    {"name": "a ws ERROR with no flags", "kind": 3, "flags": 0, "length": 28, "transport": "ws"},
+    {"name": "a ws OPEN with no flags", "kind": 4, "flags": 0, "length": 4096, "transport": "ws"},
+    {"name": "a ws OPEN_ACK with no flags", "kind": 5, "flags": 0, "length": 2048, "transport": "ws"},
+    {"name": "a ws CLOSE with no flags", "kind": 6, "flags": 0, "length": 7, "transport": "ws"},
+    {"name": "a ws PING with no flags", "kind": 7, "flags": 0, "length": 8, "transport": "ws"},
+    {"name": "a ws PONG with no flags", "kind": 8, "flags": 0, "length": 8, "transport": "ws"},
+    {"name": "a ws GOAWAY with no flags", "kind": 9, "flags": 0, "length": 0, "transport": "ws"},
+    {"name": "a ws REKEY_REQUEST with no flags", "kind": 10, "flags": 0, "length": 0, "transport": "ws"}
+  ],
+
+  "messages": [
+    {"name": "one DATA frame and nothing else", "hex": "894d5402020000000000000568656c6c6f", "expect": {"kind": 2, "flags": 0, "length": 5, "payload": "68656c6c6f"}},
+    {"name": "a length 0 DATA is exactly the envelope", "hex": "894d54020200000000000000", "expect": {"kind": 2, "flags": 0, "length": 0, "payload": ""}},
+    {"name": "a text fragment", "hex": "894d5402020600000000000368656c", "expect": {"kind": 2, "flags": 6, "length": 3, "payload": "68656c"}},
+    {"name": "one byte short of the declared length", "hex": "894d5402020000000000000568656c6c", "error": "message_length"},
+    {"name": "one byte of padding after the frame", "hex": "894d5402020000000000000568656c6c6f00", "error": "message_length"},
+    {"name": "two frames in one message", "hex": "894d54020200000000000000894d54020200000000000000", "error": "message_length"},
+    {"name": "a length 5 frame carrying no payload", "hex": "894d54020200000000000005", "error": "message_length"},
+    {"name": "eleven bytes", "hex": "894d540202000000000000", "error": "short"},
+    {"name": "empty message", "hex": "", "error": "short"},
+    {"name": "over max_frame_bytes", "hex": "894d5402020000000000000568656c6c6f", "max_frame_bytes": 4, "error": "too_large"},
+    {"name": "exactly max_frame_bytes", "hex": "894d5402020000000000000568656c6c6f", "max_frame_bytes": 5, "expect": {"kind": 2, "flags": 0, "length": 5, "payload": "68656c6c6f"}},
+    {"name": "the length bound is checked before the message length", "hex": "894d540202000000ffffffff", "max_frame_bytes": 4096, "error": "too_large"},
+    {"name": "END on a ws DATA, once the envelope is whole", "hex": "894d5402020100000000000568656c6c6f", "error": "payload"},
+    {"name": "END and MORE on a ws DATA, once the envelope is whole", "hex": "894d5402020300000000000568656c6c6f", "error": "payload"},
+    {"name": "a length 0 DATA carrying TEXT, once the envelope is whole", "hex": "894d54020204000000000000", "error": "payload"}
+  ],
+
+  "runs": [
+    {
+      "name": "three fragments of one text message",
+      "frames": [
+        {"flags": 6, "app": "68656c"},
+        {"flags": 6, "app": "6c6f20"},
+        {"flags": 4, "app": "776f726c64"}
+      ],
+      "expect": {"text": true, "app": "68656c6c6f20776f726c64", "fragments": 3, "messages": 1}
+    },
+    {
+      "name": "two fragments of one binary message",
+      "frames": [
+        {"flags": 2, "app": "00ff"},
+        {"flags": 0, "app": "01"}
+      ],
+      "expect": {"text": false, "app": "00ff01", "fragments": 2, "messages": 1}
+    },
+    {
+      "name": "an unfragmented text message is a run of one",
+      "frames": [
+        {"flags": 4, "app": "6f6b"}
+      ],
+      "expect": {"text": true, "app": "6f6b", "fragments": 1, "messages": 1}
+    },
+    {
+      "name": "a length 0 DATA before a run is a heartbeat",
+      "frames": [
+        {"flags": 0, "app": ""},
+        {"flags": 2, "app": "6162"},
+        {"flags": 0, "app": "63"}
+      ],
+      "expect": {"text": false, "app": "616263", "fragments": 2, "messages": 1}
+    },
+    {
+      "name": "a length 0 DATA inside a run truncates the message",
+      "frames": [
+        {"flags": 6, "app": "68656c"},
+        {"flags": 0, "app": ""},
+        {"flags": 4, "app": "6c6f"}
+      ],
+      "error": "empty_in_run"
+    },
+    {
+      "name": "text cleared inside a run",
+      "frames": [
+        {"flags": 6, "app": "68656c"},
+        {"flags": 2, "app": "6c6f"}
+      ],
+      "error": "text_changed"
+    },
+    {
+      "name": "text set inside a run",
+      "frames": [
+        {"flags": 2, "app": "00ff"},
+        {"flags": 4, "app": "01"}
+      ],
+      "error": "text_changed"
+    }
+  ],
+
+  "close_codes": [
+    {"name": "pair_not_found", "code": 470, "close_code": 4070, "registered": true},
+    {"name": "decoder_restore_failed", "code": 471, "close_code": 4071, "registered": true},
+    {"name": "encoder_restore_failed", "code": 472, "close_code": 4072, "registered": true},
+    {"name": "decode_failed", "code": 473, "close_code": 4073, "registered": true},
+    {"name": "encode_failed", "code": 474, "close_code": 4074, "registered": true},
+    {"name": "invalid_client_id", "code": 475, "close_code": 4075, "registered": true},
+    {"name": "pool_exhausted", "code": 476, "close_code": 4076, "registered": true},
+    {"name": "invalid_frame", "code": 477, "close_code": 4077, "registered": true},
+    {"name": "frame_version_unsupported", "code": 478, "close_code": 4078, "registered": true},
+    {"name": "replay_rejected", "code": 479, "close_code": 4079, "registered": true},
+    {"name": "no_domain_for_host", "code": 480, "close_code": 4080, "registered": true},
+    {"name": "frame_too_large", "code": 481, "close_code": 4081, "registered": true},
+    {"name": "metadata_invalid", "code": 482, "close_code": 4082, "registered": true},
+    {"name": "header_mismatch", "code": 483, "close_code": 4083, "registered": true},
+    {"name": "target_policy", "code": 484, "close_code": 4084, "registered": true},
+    {"name": "upstream_capacity", "code": 485, "close_code": 4085, "registered": true},
+    {"name": "pair_busy", "code": 486, "close_code": 4086, "registered": true},
+    {"name": "rekey_overdue", "code": 487, "close_code": 4087, "registered": true},
+    {"name": "limit", "code": 488, "close_code": 4088, "registered": true},
+    {"name": "target_reset", "code": 489, "close_code": 4089, "registered": true},
+    {"name": "invalid_request", "code": 490, "close_code": 4090, "registered": true},
+    {"name": "internal", "code": 500, "close_code": 4100, "registered": true},
+    {"name": "upstream", "code": 502, "close_code": 4102, "registered": true},
+    {"name": "state_store", "code": 503, "close_code": 4103, "registered": true},
+    {"name": "the spare 491 maps even though nothing is registered under it", "code": 491, "close_code": 4091, "registered": false},
+    {"name": "the bottom of the mapped window", "code": 400, "close_code": 4000, "registered": false},
+    {"name": "the top of the mapped window", "code": 1399, "close_code": 4999, "registered": false}
+  ],
+
+  "close_codes_out_of_domain": [
+    {"name": "one below the window", "code": 399, "close_code": 1011},
+    {"name": "one above the window", "code": 1400, "close_code": 1011},
+    {"name": "zero", "code": 0, "close_code": 1011},
+    {"name": "the top of a uint16", "code": 65535, "close_code": 1011}
+  ],
+
+  "close_codes_not_inverted": [
+    {"name": "a clean close", "close_code": 1000},
+    {"name": "going away", "close_code": 1001},
+    {"name": "a library protocol error", "close_code": 1002},
+    {"name": "an internal error", "close_code": 1011},
+    {"name": "one below the application range", "close_code": 3999},
+    {"name": "one above the application range", "close_code": 5000},
+    {"name": "zero", "close_code": 0},
+    {"name": "the top of a uint16", "close_code": 65535}
+  ],
+
+  "_close_classes": "A row with no `code` is a close that implies no relay code. The two languages spell that absence differently on purpose: Go carries CloseInfo.Code as 0 and TypeScript leaves CloseInfo.code undefined, which is the idiom each language reads as empty. The vector drives both from the same absent member, so neither spelling can drift into meaning something else: Go unmarshals a missing number as 0 and TypeScript reads a missing member as undefined, and each test asserts against exactly that. Fifteen of the rows below exercise it. 0 is not a relay code and never will be, which is what makes the Go spelling safe.",
+  "close_classes": [
+    {"name": "normal closure", "close_code": 1000, "class": "clean"},
+    {"name": "going away", "close_code": 1001, "class": "clean"},
+    {"name": "protocol error, raised by the library", "close_code": 1002, "class": "invalid_frame", "code": 477},
+    {"name": "unsupported data", "close_code": 1003, "class": "invalid_frame", "code": 477},
+    {"name": "message too big, raised by the library", "close_code": 1009, "class": "invalid_frame", "code": 477},
+    {"name": "abnormal closure, synthesized locally", "close_code": 1006, "class": "transport"},
+    {"name": "internal error", "close_code": 1011, "class": "transport"},
+    {"name": "no status received", "close_code": 1005, "class": "unknown"},
+    {"name": "invalid frame payload data", "close_code": 1007, "class": "unknown"},
+    {"name": "policy violation", "close_code": 1008, "class": "unknown"},
+    {"name": "mandatory extension", "close_code": 1010, "class": "unknown"},
+    {"name": "service restart", "close_code": 1012, "class": "unknown"},
+    {"name": "try again later", "close_code": 1013, "class": "unknown"},
+    {"name": "tls handshake", "close_code": 1015, "class": "unknown"},
+    {"name": "below the assigned range", "close_code": 999, "class": "unknown"},
+    {"name": "the registered range, which is not the private one", "close_code": 3000, "class": "unknown"},
+    {"name": "one below the private range", "close_code": 3999, "class": "unknown"},
+    {"name": "pair_not_found", "close_code": 4070, "class": "relay_code", "code": 470},
+    {"name": "invalid_client_id", "close_code": 4075, "class": "relay_code", "code": 475},
+    {"name": "state_store", "close_code": 4103, "class": "relay_code", "code": 503},
+    {"name": "the top of the private range", "close_code": 4999, "class": "relay_code", "code": 1399},
+    {"name": "one above the private range", "close_code": 5000, "class": "unknown"}
+  ]
+}

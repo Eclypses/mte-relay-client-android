@@ -1,0 +1,39 @@
+// The frame version 2 wire codec.
+//
+// A separate module on purpose. SocketX must adopt this same codec -- that is
+// the whole point of the unification Trevor did server-side -- and the only way
+// to keep it adoptable is to make "depends on nothing relay-specific" a thing
+// the compiler enforces rather than a thing we remember. Nothing here may import
+// com.eclypses.relay.
+//
+// Pure Kotlin/JVM, not an Android library: the codec is bytes and JSON, it needs
+// no Android API, and a JVM module runs its tests without an emulator.
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.9.24'
+    id 'java-library'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
+    }
+}
+
+dependencies {
+    // main has no dependencies at all, and should stay that way.
+    testImplementation 'org.jetbrains.kotlin:kotlin-test:1.9.24'
+    testImplementation 'org.json:json:20240303'   // reads the vectors, test only
+}
+
+// The vendored spec vectors live in the relay module's test resources; the wire
+// tests read the same files rather than a second copy that could drift.
+tasks.named('test') {
+    useJUnitPlatform()
+    systemProperty 'spec.vectors.dir',
+        rootProject.file('relay/src/test/resources/spec-vectors').absolutePath
+}

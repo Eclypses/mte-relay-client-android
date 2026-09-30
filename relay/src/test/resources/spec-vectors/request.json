@@ -1,0 +1,24 @@
+[
+  {
+    "name": "http request, MKE, GET, 40 byte token, 3 byte metadata",
+    "hex": "0100000102030405060708090a0b0c0d0e0f002800112233445566778899aabbccddeeff00112233445566778899aabbccddeeff001122334455667700000003010203",
+    "expect": {"mteType": 1, "method": 0, "pairId": "000102030405060708090a0b0c0d0e0f", "token": "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff0011223344556677", "metadata": "010203", "connection": false}
+  },
+  {
+    "name": "http request, MTE, extended method 255",
+    "hex": "00ff000102030405060708090a0b0c0d0e0f002800112233445566778899aabbccddeeff00112233445566778899aabbccddeeff001122334455667700000001ff",
+    "expect": {"mteType": 0, "method": 255, "pairId": "000102030405060708090a0b0c0d0e0f", "token": "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff0011223344556677", "metadata": "ff", "connection": false}
+  },
+  {
+    "name": "connection request, CONNECT, zeroed ids",
+    "hex": "010800000000000000000000000000000000000000000002beef",
+    "expect": {"mteType": 1, "method": 8, "pairId": "00000000000000000000000000000000", "token": "", "metadata": "beef", "connection": true}
+  },
+  {"name": "token length 39", "hex": "0100000102030405060708090a0b0c0d0e0f002700112233445566778899aabbccddeeff00112233445566778899aabbccddeeff0011223344556600000003010203", "error": "payload"},
+  {"name": "trailing byte after metadata", "hex": "0100000102030405060708090a0b0c0d0e0f002800112233445566778899aabbccddeeff00112233445566778899aabbccddeeff001122334455667700000003010203ff", "error": "payload"},
+  {"name": "metadata length short of the bytes", "hex": "0100000102030405060708090a0b0c0d0e0f002800112233445566778899aabbccddeeff00112233445566778899aabbccddeeff0011223344556677000000040102", "error": "payload"},
+  {"name": "empty metadata", "hex": "0100000102030405060708090a0b0c0d0e0f000000000000", "error": "payload"},
+  {"name": "method byte 9", "hex": "0109000102030405060708090a0b0c0d0e0f000000000001aa", "error": "payload"},
+  {"name": "mte type 2", "hex": "0200000102030405060708090a0b0c0d0e0f000000000001aa", "error": "payload"},
+  {"name": "too short", "hex": "01", "error": "payload"}
+]

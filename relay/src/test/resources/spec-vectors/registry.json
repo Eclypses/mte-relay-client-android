@@ -1,0 +1,270 @@
+{
+  "_": "spec/registry.md as data. That document is the normative text and this file is the same set of tables in a form a test can read, so the Go tables under wire and the TypeScript tables under mte-relay-browser/src/protocol are both measured against one artifact rather than against each other. This is data and not a code generator: generating the registry document would mean generating the prose around the rows, and the rows are the part that drifts. The error registry is actions, codes, unregistered_codes, retired_codes, action_defaults and reason_tokens. Everything after those covers the sections of registry.md that carried no vector at all: frame versions, signature, kinds, flag bits, MTE types, method bytes, the error header string, metadata members, keepalive members, feature names, the WebSocket subprotocol, the token domain string, and the connection close reasons. A section that already has a file of its own is not repeated here: paths in path.json, personalization in personalization.json, WebSocket close codes in ws.json, discovery fields in discovery.json, and the MTE profile string in probe.json.",
+
+  "_coverage": "Every table below is measured in both directions wherever a build defines the value: a registered value has to exist in the code, and the code may define no value the registry does not list. Four tables are thinner than that and it is worth saying which and why, because a vector that looks complete and is not is worse than one that admits a gap. The flag bit rows carry the bit, the mask and the name and no transport column: registry.md says END is HTTP only and never on TCP, frame-v2.md section 1 says HTTP and TCP only, frame-v2.md section 4 says END never appears on TCP, and neither ValidateFlags refuses END on TCP. Three answers to one question is a review item, not something to freeze into a vector. feature_names is exact in Go only, where the advertised list is exactly the rows with no phase; the browser is held to spelling every one of those rows and no further, because its Feature map also carries owner-mode, a name registry.md does not reserve, and asserting the reverse direction would decide a question that belongs in a pull request against registry.md. ws_subprotocols has no Go constant, because no build in this repository serves WebSocket yet, and none in mte-relay-browser either; socketx-client-typescript names it in src/socket.ts and is the only place it is measured.token carries the HMAC domain separation string, which neither language exposes as an exported identifier, so it is measured through the token MintToken actually produces rather than by reading a constant. The error header string and the keepalive members live outside src/protocol in TypeScript, so the copied protocol test cannot reach them and mte-relay-browser asserts them in its own tree instead.",
+
+  "actions": [
+    "surface",
+    "surface_security",
+    "replace_pair",
+    "full_repair",
+    "back_off",
+    "retry_once_then_replace",
+    "back_off_not_owner",
+    "reconnect",
+    "retry_same",
+    "stop"
+  ],
+
+  "codes": [
+    {"code": 470, "reasons": [{"reason": "pair_not_found", "action": "replace_pair"}]},
+    {"code": 471, "reasons": [{"reason": "decoder_restore_failed", "action": "replace_pair"}]},
+    {"code": 472, "reasons": [{"reason": "encoder_restore_failed", "action": "replace_pair"}]},
+    {"code": 473, "reasons": [{"reason": "decode_failed", "action": "replace_pair"}]},
+    {"code": 474, "reasons": [{"reason": "encode_failed", "action": "replace_pair"}]},
+    {"code": 475, "reasons": [
+      {"reason": "invalid_client_id", "action": "full_repair"},
+      {"reason": "invalid_token", "action": "full_repair"},
+      {"reason": "unknown_key", "action": "stop"}
+    ]},
+    {"code": 476, "reasons": [{"reason": "pool_exhausted", "action": "back_off"}]},
+    {"code": 477, "reasons": [
+      {"reason": "invalid_frame", "action": "surface"},
+      {"reason": "eof_before_end", "action": "replace_pair"}
+    ]},
+    {"code": 478, "reasons": [{"reason": "frame_version_unsupported", "action": "surface"}]},
+    {"code": 479, "reasons": [{"reason": "replay_rejected", "action": "surface_security"}]},
+    {"code": 480, "reasons": [{"reason": "no_domain_for_host", "action": "surface"}]},
+    {"code": 481, "reasons": [
+      {"reason": "frame_too_large", "action": "surface"},
+      {"reason": "body_too_large", "action": "surface"},
+      {"reason": "message_too_large", "action": "replace_pair"}
+    ]},
+    {"code": 482, "reasons": [{"reason": "metadata_invalid", "action": "surface"}]},
+    {"code": 483, "reasons": [{"reason": "header_mismatch", "action": "surface_security"}]},
+    {"code": 484, "reasons": [
+      {"reason": "target_forbidden", "action": "stop"},
+      {"reason": "port_out_of_range", "action": "surface"},
+      {"reason": "authz_revoked", "action": "stop"}
+    ]},
+    {"code": 485, "reasons": [{"reason": "upstream_capacity", "action": "back_off"}]},
+    {"code": 486, "reasons": [
+      {"reason": "pair_busy", "action": "retry_once_then_replace"},
+      {"reason": "not_owner", "action": "back_off_not_owner"}
+    ]},
+    {"code": 487, "reasons": [{"reason": "rekey_overdue", "action": "reconnect"}]},
+    {"code": 488, "reasons": [
+      {"reason": "connection_limit", "action": "back_off"},
+      {"reason": "rate_limited", "action": "back_off"}
+    ]},
+    {"code": 489, "reasons": [{"reason": "target_reset", "action": "surface"}]},
+    {"code": 490, "reasons": [
+      {"reason": "invalid_request", "action": "surface"},
+      {"reason": "pair_exists", "action": "surface"},
+      {"reason": "pair_limit", "action": "surface"},
+      {"reason": "profile_mismatch", "action": "surface"}
+    ]},
+    {"code": 500, "reasons": [
+      {"reason": "internal", "action": "surface"},
+      {"reason": "configuration", "action": "surface"}
+    ]},
+    {"code": 502, "reasons": [
+      {"reason": "upstream_connect_failed", "action": "surface"},
+      {"reason": "upstream_response_failed", "action": "surface"}
+    ]},
+    {"code": 503, "reasons": [
+      {"reason": "state_store_unavailable", "action": "retry_same"},
+      {"reason": "state_store_write_failed", "action": "replace_pair"}
+    ]}
+  ],
+
+  "unregistered_codes": [0, 200, 400, 404, 469, 491, 492, 493, 501, 504, 559, 569, 599],
+
+  "retired_codes": [
+    {"code": 559, "meaning": "pair not found"},
+    {"code": 560, "meaning": "decoder restore failed"},
+    {"code": 561, "meaning": "encoder restore failed"},
+    {"code": 562, "meaning": "decode failed"},
+    {"code": 563, "meaning": "encode failed"},
+    {"code": 564, "meaning": "invalid client id"},
+    {"code": 565, "meaning": "state pool exhausted"},
+    {"code": 566, "meaning": "invalid request format"},
+    {"code": 567, "meaning": "internal relay error"},
+    {"code": 568, "meaning": "configuration error"},
+    {"code": 569, "meaning": "reserved"}
+  ],
+
+  "action_defaults": [
+    {"_": "An unregistered reason under a registered code takes the code's default, so a relay that adds a reason never turns a shipped client into a pair replacement storm."},
+    {"code": 470, "reason": "a_reason_this_build_does_not_know", "action": "replace_pair"},
+    {"code": 475, "reason": "a_reason_this_build_does_not_know", "action": "full_repair"},
+    {"code": 477, "reason": "a_reason_this_build_does_not_know", "action": "surface"},
+    {"code": 481, "reason": "a_reason_this_build_does_not_know", "action": "surface"},
+    {"code": 484, "reason": "a_reason_this_build_does_not_know", "action": "stop"},
+    {"code": 486, "reason": "a_reason_this_build_does_not_know", "action": "retry_once_then_replace"},
+    {"code": 488, "reason": "a_reason_this_build_does_not_know", "action": "back_off"},
+    {"code": 503, "reason": "a_reason_this_build_does_not_know", "action": "retry_same"},
+    {"code": 491, "reason": "invalid_request", "action": "surface"},
+    {"code": 404, "reason": "not_found", "action": "surface"},
+    {"code": 559, "reason": "pair_not_found", "action": "surface"}
+  ],
+
+  "reason_tokens": {
+    "max_bytes": 64,
+    "valid": [
+      "pair_not_found",
+      "a",
+      "ab",
+      "a0",
+      "a_b",
+      "a_0_b_1",
+      "state_store_write_failed",
+      "abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcd"
+    ],
+    "invalid": [
+      "",
+      "A",
+      "Pair_Not_Found",
+      "0abc",
+      "_abc",
+      "pair-not-found",
+      "pair not found",
+      "pair.not.found",
+      "pair_not_found\n",
+      "\u00e9",
+      "abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcde"
+    ]
+  },
+
+  "frame_versions": [
+    {"version": 0, "status": "forbidden", "note": "never valid on the wire"},
+    {"version": 1, "status": "legacy", "note": "the MTE signature layout; detected forever, answered with 478"},
+    {"version": 2, "status": "current", "note": "this specification"},
+    {"version": 3, "through": 255, "status": "unassigned"}
+  ],
+
+  "signature": [
+    {"name": "frame_v2", "hex": "894d54", "meaning": "frame version 2 and later"},
+    {"name": "legacy", "hex": "4d5445", "meaning": "frame version 1 and the earlier Head Flag layout"}
+  ],
+
+  "kinds": [
+    {"kind": 0, "name": "REQUEST", "status": "assigned"},
+    {"kind": 1, "name": "RESPONSE", "status": "assigned"},
+    {"kind": 2, "name": "DATA", "status": "assigned"},
+    {"kind": 3, "name": "ERROR", "status": "assigned"},
+    {"kind": 4, "name": "OPEN", "status": "assigned"},
+    {"kind": 5, "name": "OPEN_ACK", "status": "assigned"},
+    {"kind": 6, "name": "CLOSE", "status": "assigned"},
+    {"kind": 7, "name": "PING", "status": "assigned"},
+    {"kind": 8, "name": "PONG", "status": "assigned"},
+    {"kind": 9, "name": "GOAWAY", "status": "assigned"},
+    {"kind": 10, "name": "REKEY_REQUEST", "status": "assigned"},
+    {"kind": 11, "through": 199, "status": "unassigned", "note": "specification required"},
+    {"kind": 200, "through": 254, "status": "experimental", "note": "never on a public relay"},
+    {"kind": 255, "status": "reserved"}
+  ],
+
+  "flag_bits": [
+    {"bit": 0, "mask": 1, "name": "END", "status": "assigned"},
+    {"bit": 1, "mask": 2, "name": "MORE", "status": "assigned"},
+    {"bit": 2, "mask": 4, "name": "TEXT", "status": "assigned"},
+    {"bit": 3, "mask": 8, "name": "HALF", "status": "assigned"},
+    {"bit": 4, "mask": 16, "name": "SEGMENT", "status": "reserved", "note": "reserved for an authenticated chunk mode"},
+    {"bit": 5, "mask": 32, "name": "EXT", "status": "reserved", "note": "reserved for an extensions block"},
+    {"bit": 6, "mask": 64, "name": "MAC_PRESENT", "status": "reserved", "note": "reserved for an authenticated control channel"},
+    {"bit": 7, "mask": 128, "status": "reserved"}
+  ],
+
+  "mte_types": [
+    {"value": 0, "name": "MTE", "note": "standard MTE; HTTP only"},
+    {"value": 1, "name": "MKE", "note": "required on connections"},
+    {"value": 2, "through": 255, "status": "unassigned"}
+  ],
+
+  "method_bytes": [
+    {"value": 0, "method": "GET"},
+    {"value": 1, "method": "POST"},
+    {"value": 2, "method": "PUT"},
+    {"value": 3, "method": "PATCH"},
+    {"value": 4, "method": "DELETE"},
+    {"value": 5, "method": "HEAD"},
+    {"value": 6, "method": "OPTIONS"},
+    {"value": 7, "method": "TRACE"},
+    {"value": 8, "method": "CONNECT"},
+    {"value": 9, "through": 254, "status": "unassigned"},
+    {"value": 255, "status": "extended", "note": "the metadata method string is authoritative"}
+  ],
+
+  "header_string": {
+    "header": "X-MTE-Relay-Error",
+    "format": "<code> <reason>",
+    "example": {"code": 470, "reason": "pair_not_found", "value": "470 pair_not_found"},
+    "note": "on every relay generated HTTP response"
+  },
+
+  "metadata_members": [
+    {"member": "v", "status": "assigned"},
+    {"member": "method", "status": "assigned"},
+    {"member": "status", "status": "assigned"},
+    {"member": "path", "status": "assigned"},
+    {"member": "target", "status": "assigned"},
+    {"member": "port", "status": "assigned"},
+    {"member": "id", "status": "assigned"},
+    {"member": "headers", "status": "assigned"},
+    {"member": "length", "status": "candidate", "note": "plan Q6: total plaintext body bytes when known, so a large upload reaches the origin with Content-Length. No build reads or writes it, and a reader drops it with every other unknown member."},
+    {"member": "x-<vendor>-*", "prefix": "x-", "status": "vendor", "note": "vendor members, carried through"},
+    {"member": "_*", "prefix": "_", "status": "experimental", "note": "experimental, ignored by readers"}
+  ],
+
+  "keepalive_members": [
+    {"member": "clientId", "status": "assigned"},
+    {"member": "drop", "status": "assigned", "note": "assigned by erratum 2026-09-06; at most maxPairsPerClient entries"}
+  ],
+
+  "feature_names": [
+    {"name": "http", "meaning": "the HTTP transport"},
+    {"name": "keepalive", "meaning": "POST /api/mte-keepalive"},
+    {"name": "plain-headers", "meaning": "the forward_plain_headers allowlist"},
+    {"name": "browser-cookies", "meaning": "forward_browser_cookies"},
+    {"name": "pass-through", "meaning": "pass through routes"},
+    {"name": "relay-error-header", "meaning": "X-MTE-Relay-Error on relay generated responses"},
+    {"name": "ws", "meaning": "the WebSocket transport", "phase": 9},
+    {"name": "rekey", "meaning": "REKEY_REQUEST and encoded OPEN", "phase": 9},
+    {"name": "goaway", "meaning": "GOAWAY and drainSeconds", "phase": 9},
+    {"name": "tcp", "meaning": "the raw TCP transport", "phase": 10}
+  ],
+
+  "ws_subprotocols": [
+    {"name": "mte-relay.v2", "note": "offered on the handshake and echoed by the server; a handshake that does not echo it is refused"}
+  ],
+
+  "token": {
+    "domain": "mte-relay/token/2",
+    "size": 40,
+    "note": "the HMAC domain separation string of the 40 byte client token. The MAC is the first 16 bytes of HMAC SHA256 under the domain secret over this string followed by the first 24 bytes of the token."
+  },
+
+  "connection_close_reasons": [
+    "client_closed",
+    "target_closed",
+    "target_reset",
+    "idle_deadline",
+    "max_lifetime",
+    "rekey_overdue",
+    "drain",
+    "authz_revoked",
+    "protocol_error",
+    "transport_lost"
+  ],
+
+  "rejected_open_reasons": [
+    "unknown_key",
+    "invalid_token",
+    "target_forbidden",
+    "connection_limit",
+    "rate_limited",
+    "port_out_of_range",
+    "upstream_connect_failed"
+  ]
+}

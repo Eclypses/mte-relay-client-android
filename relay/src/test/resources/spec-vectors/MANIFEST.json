@@ -1,0 +1,19 @@
+{
+  "files": {
+    "control.json": "b0778e8308b218b0ce0e24d96c772e638141dc4baaf1000cfab8fc7b103b7b2d",
+    "data.json": "0d7154fea0bd0c037bd086cc7c805f8f4492a8d943816efb88e9878def998ccc",
+    "discovery.json": "19ccb4cf6659967cb8d2c526eeb40e90441af0a684289aa8b9acbf94043ba697",
+    "envelope.json": "ec4b079bfab9a84ad6adb979a165a8fba4f17f999a0c9648635169701c150830",
+    "error.json": "6411c565bddc5514cf3113751eefec90fd43eafcdadf2ac98183baf5ce69cf62",
+    "metadata.json": "eae7e2a165c81c7f9111fffe7bec794359973a8b404fe3897532e46ea4ced25f",
+    "path.json": "d95bcc674db482a80a25ccc565513c52cba34f5d6b66205480d917a82f4b1269",
+    "personalization.json": "d4d196327d32dd99fe60f20b8c86f0657180d8764521bce6ae7f5c6d62246ac5",
+    "probe.json": "b9c7de2cc2b2e2f883ec7f080bba95b14790a665f847b20587d4048e8b004795",
+    "registry.json": "b5cbc8f7fcebbd8012a2b6d42b33054b00923080607e5454b27d6369d8763f60",
+    "request.json": "7269eb074d94e78aa8fa8dee233f65d17be0c732060f2949d632f470e06ccc26",
+    "response.json": "1227a27da982ad02d37dea44f33a64884579b85e891aa3a8825f71186d753e64",
+    "ws.json": "637a40166c3240b6b3b27f5524ab7e01c58d21b47958409c35bf670e78ea96d7"
+  },
+  "note": "Vendored by scripts/sync_spec_vectors.py. Do not edit by hand -- these files are normative and belong to the server repo.",
+  "source": "unified-mte-relay/spec/vectors"
+}

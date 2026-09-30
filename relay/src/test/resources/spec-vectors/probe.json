@@ -1,0 +1,9 @@
+{
+  "note": "Inputs for the mteProfile probe in shared.Profile(). Fixed so every platform computes the same digest for the same library build; a library update that changes the codec output changes the digest everywhere at once.",
+  "entropy": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+  "nonce": 1,
+  "personalization": "mte-relay/2/probe",
+  "plaintext": "6d74652d72656c61792f322f70726f6265",
+  "operations": 2,
+  "digest": "sha256 over the concatenation of the two MKE Encode outputs, first 8 bytes, lowercase hex"
+}

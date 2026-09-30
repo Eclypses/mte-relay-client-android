@@ -1,0 +1,253 @@
+{
+  "_": "The `path` member of spec/frame-v2.md section 8.1: path plus query, no leading slash, percent encoded as sent, at most 16384 bytes, absent or empty meaning the root. Four sections because the grammar has four jobs and conflating them is what produced the drift. from_url is a writer turning a URL into the member, and every row was run through Go's url.EscapedPath plus RawQuery and the browser's URL.pathname plus URL.search before it was written down. to_target is a reader turning the member back into an absolute path reference a URL builder accepts. write is the grammar a writer must emit. read is what a reader accepts, which is deliberately wider. The Go side drives wire.MetadataPath, wire.RequestTarget, wire.ValidPath, Metadata.Marshal and ParseMetadata; the TypeScript side drives normalizePathWithQuery, requestTarget, marshalMetadata and parseMetadata in src/protocol/metadata.ts. Regenerate with gen_path.py.",
+  "max_bytes": 16384,
+  "_pad": "A write case carrying a pad uses char repeated count times as the whole path, so a 16 KiB fixture is one field rather than one unreadable line. A case has a path or a pad, never both.",
+  "_errors": "metadata is the only error token here: Go returns ErrMetadata and TypeScript throws a FrameError with code \"metadata\". The rule being broken is named by the case, not by a second token, because every one of these failures reaches a peer as 482 metadata_invalid and a client that told them apart would be acting on a distinction the wire does not carry.",
+  "from_url": [
+    {
+      "name": "path and query",
+      "url": "https://r.example/api/users?page=2",
+      "path": "api/users?page=2"
+    },
+    {
+      "name": "the root",
+      "url": "https://r.example/",
+      "path": ""
+    },
+    {
+      "name": "no path at all is the root",
+      "url": "https://r.example",
+      "path": ""
+    },
+    {
+      "name": "an encoded slash stays encoded and does not become a segment",
+      "url": "https://r.example/a%2Fb/c",
+      "path": "a%2Fb/c"
+    },
+    {
+      "name": "an encoded non ascii character is not decoded",
+      "url": "https://r.example/caf%C3%A9",
+      "path": "caf%C3%A9"
+    },
+    {
+      "name": "an encoded space stays encoded",
+      "url": "https://r.example/a%20b",
+      "path": "a%20b"
+    },
+    {
+      "name": "a literal space is encoded the same way by both",
+      "url": "https://r.example/a b",
+      "path": "a%20b"
+    },
+    {
+      "name": "the query is byte preserved",
+      "url": "https://r.example/s?q=a%2Bb&r=%20",
+      "path": "s?q=a%2Bb&r=%20"
+    },
+    {
+      "name": "a bare question mark with no query is dropped",
+      "url": "https://r.example/x?",
+      "path": "x"
+    },
+    {
+      "name": "a fragment never leaves the client",
+      "url": "https://r.example/x#frag",
+      "path": "x"
+    },
+    {
+      "name": "a plus is a literal in a path and in a query",
+      "url": "https://r.example/a+b?c=d+e",
+      "path": "a+b?c=d+e"
+    },
+    {
+      "name": "unreserved characters are not escaped",
+      "url": "https://r.example/~user/.well-known/x",
+      "path": "~user/.well-known/x"
+    },
+    {
+      "name": "an escaped unreserved character is not unescaped",
+      "url": "https://r.example/%7Euser",
+      "path": "%7Euser"
+    },
+    {
+      "name": "sub delimiters in a path are literals",
+      "url": "https://r.example/a:b@c/d",
+      "path": "a:b@c/d"
+    },
+    {
+      "name": "a repeated query key and an empty value survive",
+      "url": "https://r.example/p?a=1&a=2&b=",
+      "path": "p?a=1&a=2&b="
+    },
+    {
+      "name": "lowercase percent escapes keep their case",
+      "url": "https://r.example/%e4%bd%a0",
+      "path": "%e4%bd%a0"
+    }
+  ],
+  "to_target": [
+    {
+      "name": "the root",
+      "path": "",
+      "target": "/"
+    },
+    {
+      "name": "path and query",
+      "path": "api/users?page=2",
+      "target": "/api/users?page=2"
+    },
+    {
+      "name": "a reader is liberal about a leading slash a writer may not emit",
+      "path": "/api/users",
+      "target": "/api/users"
+    },
+    {
+      "name": "an encoded slash is never turned into a separator",
+      "path": "a%2Fb",
+      "target": "/a%2Fb"
+    },
+    {
+      "name": "the encoding is carried through untouched",
+      "path": "caf%C3%A9",
+      "target": "/caf%C3%A9"
+    },
+    {
+      "name": "a single dot segment is an ordinary segment",
+      "path": "a/./b",
+      "target": "/a/./b"
+    },
+    {
+      "name": "three dots is an ordinary segment",
+      "path": "...",
+      "target": "/..."
+    },
+    {
+      "name": "encoded dots are one segment and not a traversal",
+      "path": "a/..%2Fb",
+      "target": "/a/..%2Fb"
+    },
+    {
+      "name": "dot dot inside the query is not a path segment",
+      "path": "x?a=../b",
+      "target": "/x?a=../b"
+    },
+    {
+      "name": "one leading slash is a writer's mistake and still names a path",
+      "path": "/evil.example/x",
+      "target": "/evil.example/x"
+    },
+    {
+      "name": "two leading slashes are an authority and not a path",
+      "path": "//evil.example/x",
+      "error": "metadata"
+    },
+    {
+      "name": "a leading traversal",
+      "path": "../etc/passwd",
+      "error": "metadata"
+    },
+    {
+      "name": "a traversal in the middle",
+      "path": "a/../../etc/passwd",
+      "error": "metadata"
+    },
+    {
+      "name": "a traversal with a leading slash",
+      "path": "/a/../b",
+      "error": "metadata"
+    },
+    {
+      "name": "a nul",
+      "path": "a\u0000b",
+      "error": "metadata"
+    },
+    {
+      "name": "a carriage return",
+      "path": "a\rb",
+      "error": "metadata"
+    }
+  ],
+  "write": [
+    {
+      "name": "path and query",
+      "path": "api/users?page=2"
+    },
+    {
+      "name": "an encoded slash",
+      "path": "a%2Fb/c"
+    },
+    {
+      "name": "a tab is not one of the three characters the text rule bars",
+      "path": "a\tb"
+    },
+    {
+      "name": "a writer may not emit a leading slash",
+      "path": "/api/users",
+      "error": "metadata"
+    },
+    {
+      "name": "a writer may not emit a protocol relative reference",
+      "path": "//evil.example/x",
+      "error": "metadata"
+    },
+    {
+      "name": "exactly the byte bound",
+      "pad": {
+        "char": "p",
+        "count": 16384
+      }
+    },
+    {
+      "name": "one byte over the bound",
+      "error": "metadata",
+      "pad": {
+        "char": "p",
+        "count": 16385
+      }
+    },
+    {
+      "name": "exactly the byte bound in two byte characters",
+      "pad": {
+        "char": "é",
+        "count": 8192
+      }
+    },
+    {
+      "name": "the utf16 trap: 8193 code units and 16386 bytes",
+      "error": "metadata",
+      "pad": {
+        "char": "é",
+        "count": 8193
+      }
+    },
+    {
+      "name": "a nul",
+      "path": "a\u0000b",
+      "error": "metadata"
+    },
+    {
+      "name": "a carriage return",
+      "path": "a\rb",
+      "error": "metadata"
+    },
+    {
+      "name": "a line feed",
+      "path": "a\nb",
+      "error": "metadata"
+    }
+  ],
+  "read": [
+    {
+      "name": "the grammar as a writer emits it",
+      "path": "api/users?page=2"
+    },
+    {
+      "name": "a leading slash is accepted and never normalized away by the parser",
+      "path": "/api/users"
+    },
+    {
+      "name": "a traversal reaches the reader intact, because RequestTarget is what refuses it",
+      "path": "a/../b"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "plaintext": [
+    {"name": "end with hello", "flags": 1, "app": "68656c6c6f", "plaintext": "0168656c6c6f"},
+    {"name": "bare end", "flags": 1, "app": "", "plaintext": "01"},
+    {"name": "more text fragment", "flags": 6, "app": "ab", "plaintext": "06ab"},
+    {"name": "half close", "flags": 8, "app": "", "plaintext": "08"},
+    {"name": "no flags", "flags": 0, "app": "00", "plaintext": "0000"}
+  ],
+  "split": [
+    {"name": "matches", "plaintext": "0168656c6c6f", "want": 1, "app": "68656c6c6f"},
+    {"name": "flags forged from end to none", "plaintext": "0168656c6c6f", "want": 0, "error": "flags_mismatch"},
+    {"name": "flags forged from none to end", "plaintext": "0068656c6c6f", "want": 1, "error": "flags_mismatch"},
+    {"name": "empty plaintext", "plaintext": "", "want": 1, "error": "payload"}
+  ]
+}

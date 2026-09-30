@@ -1,0 +1,13 @@
+[
+  {"name": "473 decode_failed", "code": 473, "json": "{\"reason\":\"decode_failed\"}", "expect": {"reason": "decode_failed", "message": ""}},
+  {"name": "478 with message", "code": 478, "json": "{\"message\":\"server accepts [2], client offered []; minimum SDK versions android 5.0.0 ios 5.0.0\",\"reason\":\"frame_version_unsupported\"}", "expect": {"reason": "frame_version_unsupported", "message": "server accepts [2], client offered []; minimum SDK versions android 5.0.0 ios 5.0.0"}},
+  {"name": "502 with nested cause from hop 2", "code": 502, "json": "{\"cause\":{\"code\":470,\"hop\":2,\"reason\":\"pair_not_found\"},\"message\":\"downstream relay rejected the pair\",\"reason\":\"upstream_response_failed\"}", "expect": {"reason": "upstream_response_failed", "message": "downstream relay rejected the pair", "cause": {"code": 470, "hop": 2, "reason": "pair_not_found"}}},
+  {"name": "message with html and slash unescaped", "code": 480, "json": "{\"message\":\"no domain for host <evil>/path&x\",\"reason\":\"no_domain_for_host\"}", "expect": {"reason": "no_domain_for_host", "message": "no domain for host <evil>/path&x"}},
+  {"name": "unknown newer reason with registry shape is accepted", "code": 477, "json": "{\"reason\":\"frame_shape_v3\"}", "expect": {"reason": "frame_shape_v3", "message": ""}},
+  {"name": "unknown member ignored", "code": 470, "json": "{\"extra\":[1,2],\"reason\":\"pair_not_found\"}", "expect": {"reason": "pair_not_found", "message": ""}, "canonical": "{\"reason\":\"pair_not_found\"}"},
+  {"name": "duplicate key", "hex": "01d97b22726561736f6e223a226131222c22726561736f6e223a226132227d", "error": "payload"},
+  {"name": "reason missing", "hex": "01d97b7d", "error": "payload"},
+  {"name": "reason with uppercase", "hex": "01d97b22726561736f6e223a2244656f6465227d", "error": "payload"},
+  {"name": "not an object", "hex": "01d95b5d", "error": "payload"},
+  {"name": "one byte", "hex": "01", "error": "payload"}
+]

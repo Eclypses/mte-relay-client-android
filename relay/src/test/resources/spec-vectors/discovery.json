@@ -1,0 +1,355 @@
+{
+  "note": "The discovery document at GET /api/mte-relay. It is the one protocol surface that had no vector, no shared type, and an independent spelling in every implementation, and the rule that no implementation invents a member was held by a comment in one Go file. members is the registered set with the type each name carries; registry.md holds the same names in prose and this file is what a build is measured against. A build that serves or reads a member absent from members has invented one. documents drive every client parser: a parser asserts only the members it consumes, because different carriers need different ones, but it has to agree on the value of every member it does consume.",
+  "members": [
+    {
+      "name": "discoverySchema",
+      "type": "integer",
+      "note": "The shape of this document. A client that does not know the value refuses rather than guessing which members mean what."
+    },
+    {
+      "name": "buildVersion",
+      "type": "string",
+      "note": "The full version of the build that answered, not the protocol. Informational: a client keys behavior on features, never on this. The endpoint is unauthenticated, so this publishes the build an operator is running to anyone who asks; that exposure is accepted deliberately in exchange for a version an operator and a support engineer can read without shell access. Absorbed generation and serverVersion, both of which named a piece of what this carries. Named for the binary rather than a product because mte-relay, socketx and tcpq all serve this document and a client is not meant to tell them apart from it; see registry.md."
+    },
+    {
+      "name": "frameVersions",
+      "type": "integer[]",
+      "note": "Every frame version this build serves. A client that speaks none of them cannot pair and refuses here."
+    },
+    {
+      "name": "deprecatedFrameVersions",
+      "type": "integer[]",
+      "note": "Versions still served but on the way out. Present only once a second version exists, so no build sends it today."
+    },
+    {
+      "name": "features",
+      "type": "string[]",
+      "note": "Registry feature names. This is the only thing a client keys behavior on."
+    },
+    {
+      "name": "mteProfile",
+      "type": "string",
+      "note": "The MTE build string. A mismatch means the two libraries cannot pair, whatever else agrees."
+    },
+    {
+      "name": "configVersion",
+      "type": "integer",
+      "note": "The applied configuration version. Informational."
+    },
+    {
+      "name": "kyberStrength",
+      "type": "integer",
+      "note": "512, 768 or 1024. Anything else is a value a client cannot instantiate."
+    },
+    {
+      "name": "sequenceWindow",
+      "type": "integer",
+      "note": "A pairing input and not a hint. Signed: the relay ships minus 63."
+    },
+    {
+      "name": "timeWindow",
+      "type": "integer",
+      "note": "A pairing input and not a hint. Both ends construct the decoder with it, so a disagreement is no pair at all rather than a degraded one, and nothing in the failure says why. Zero is a legal MTE window and is also the Go zero value a server sends when the block that fills this member did not run, and the wire cannot tell the two apart, so a client falls back to 1000 rather than adopting it. A server closes the ambiguity at its end by seeding the member with the value it would actually use."
+    },
+    {
+      "name": "maxFrameBytes",
+      "type": "integer",
+      "note": "The largest single frame the relay will read."
+    },
+    {
+      "name": "maxMessageBytes",
+      "type": "integer",
+      "note": "The largest reassembled message, across a fragment run."
+    },
+    {
+      "name": "maxMetadataBytes",
+      "type": "metadataBytes",
+      "note": "An object keyed MKE and MTE, uppercase on the wire unlike every other use of the encode type name."
+    },
+    {
+      "name": "maxPairsPerBatch",
+      "type": "integer",
+      "note": "Batch pairing over HTTP. A carrier that pairs in band sends one pair per connection and has no batch."
+    },
+    {
+      "name": "maxPairsPerClient",
+      "type": "integer",
+      "note": "Batch pairing over HTTP, and the bound on a keepalive drop list."
+    },
+    {
+      "name": "maxPairBytes",
+      "type": "integer",
+      "note": "The rekey budget per direction. A client polls its own pair against it."
+    },
+    {
+      "name": "maxPairSeconds",
+      "type": "integer",
+      "note": "The rekey budget in time."
+    },
+    {
+      "name": "maxRequestSeconds",
+      "type": "integer",
+      "note": "The request deadline. On a WebSocket it is reused as the run deadline rather than adding a field, which is worth knowing before tuning it."
+    },
+    {
+      "name": "maxResponseSeconds",
+      "type": "integer",
+      "note": "The response deadline. Zero on a socket, which has no response cycle after the upgrade."
+    },
+    {
+      "name": "idleTimeoutSeconds",
+      "type": "integer",
+      "note": "How long a connection may be silent."
+    },
+    {
+      "name": "pingIntervalSeconds",
+      "type": "integer",
+      "note": "How often the relay pings."
+    },
+    {
+      "name": "drainSeconds",
+      "type": "integer",
+      "note": "How long after a drain signal the relay keeps a connection. It has to be the budget that actually closes the connection, not a wider shutdown budget the connection never sees."
+    },
+    {
+      "name": "sessionTimeoutSeconds",
+      "type": "integer",
+      "note": "How long stored session state lives. Zero where state dies with the connection."
+    },
+    {
+      "name": "tokenMaxAgeSeconds",
+      "type": "integer",
+      "note": "How long a client token verifies."
+    },
+    {
+      "name": "ownerSeconds",
+      "type": "integer",
+      "note": "Owner mode only. No build sends it today."
+    },
+    {
+      "name": "transports",
+      "type": "string[]",
+      "note": "Which carriers this build serves. A relay that serves only one still sends an array."
+    },
+    {
+      "name": "wsPath",
+      "type": "string",
+      "note": "Where the WebSocket endpoint lives. Absent from a build that serves none."
+    },
+    {
+      "name": "tcpTargets",
+      "type": "string[]",
+      "note": "TCP alias names only, never host and port. Absent from a build that serves no TCP."
+    },
+    {
+      "name": "stateMode",
+      "type": "string",
+      "note": "Informational: how pair state is held."
+    },
+    {
+      "name": "routeHeader",
+      "type": "string",
+      "note": "Informational: the header a router keys on."
+    },
+    {
+      "name": "maxRequestBodyBytes",
+      "type": "integer",
+      "note": "HTTP only. The largest request body the relay proxies."
+    },
+    {
+      "name": "passThroughRoutes",
+      "type": "string[]",
+      "note": "HTTP only. Routes the relay forwards without encoding."
+    },
+    {
+      "name": "forwardPlainHeaders",
+      "type": "string[]",
+      "note": "HTTP only. Headers forwarded outside the ciphertext."
+    },
+    {
+      "name": "forwardBrowserCookies",
+      "type": "boolean",
+      "note": "HTTP only."
+    }
+  ],
+  "documents": [
+    {
+      "name": "http_relay",
+      "note": "An HTTP relay as mte-relay ships it. Carries the HTTP only members and no wsPath.",
+      "document": {
+        "discoverySchema": 1,
+        "buildVersion": "5.0.0",
+        "frameVersions": [
+          2
+        ],
+        "features": [
+          "http",
+          "keepalive",
+          "plain-headers",
+          "browser-cookies",
+          "pass-through",
+          "relay-error-header"
+        ],
+        "mteProfile": "mte/4.2.1+mke+kyber1024/a1b2c3d4e5f60718",
+        "configVersion": 3,
+        "kyberStrength": 1024,
+        "sequenceWindow": -63,
+        "timeWindow": 1000,
+        "maxFrameBytes": 1048576,
+        "maxMessageBytes": 1048576,
+        "maxMetadataBytes": {
+          "MKE": 61439,
+          "MTE": 61439
+        },
+        "maxPairsPerBatch": 100,
+        "maxPairsPerClient": 200,
+        "maxPairBytes": 1073741824,
+        "maxPairSeconds": 86400,
+        "maxRequestSeconds": 30,
+        "maxResponseSeconds": 30,
+        "idleTimeoutSeconds": 60,
+        "pingIntervalSeconds": 25,
+        "drainSeconds": 30,
+        "sessionTimeoutSeconds": 7200,
+        "tokenMaxAgeSeconds": 86400,
+        "transports": [
+          "http"
+        ],
+        "stateMode": "shared",
+        "routeHeader": "x-mte-relay-route",
+        "maxRequestBodyBytes": 0,
+        "passThroughRoutes": [
+          "/health"
+        ],
+        "forwardPlainHeaders": [
+          "accept-language"
+        ],
+        "forwardBrowserCookies": true
+      }
+    },
+    {
+      "name": "websocket_relay",
+      "note": "A WebSocket relay as socketx ships it. No batch pairing members, no HTTP forwarding members, and wsPath present.",
+      "document": {
+        "discoverySchema": 1,
+        "buildVersion": "2.0.0",
+        "frameVersions": [
+          2
+        ],
+        "features": [
+          "ws",
+          "goaway",
+          "rekey"
+        ],
+        "mteProfile": "mte/4.2.1+mke+kyber1024/a1b2c3d4e5f60718",
+        "kyberStrength": 1024,
+        "sequenceWindow": -63,
+        "timeWindow": 1000,
+        "maxFrameBytes": 1048576,
+        "maxMessageBytes": 16777216,
+        "maxMetadataBytes": {
+          "MKE": 1047540,
+          "MTE": 1047540
+        },
+        "maxPairBytes": 1073741824,
+        "maxPairSeconds": 86400,
+        "maxRequestSeconds": 60,
+        "maxResponseSeconds": 0,
+        "idleTimeoutSeconds": 60,
+        "pingIntervalSeconds": 54,
+        "drainSeconds": 10,
+        "sessionTimeoutSeconds": 0,
+        "tokenMaxAgeSeconds": 86400,
+        "transports": [
+          "ws"
+        ],
+        "wsPath": "/ws",
+        "stateMode": "owner",
+        "routeHeader": "x-mte-relay-route"
+      }
+    },
+    {
+      "name": "minimal",
+      "note": "Only the members both servers always send. A parser must not require an optional member in order to read this document.",
+      "document": {
+        "discoverySchema": 1,
+        "buildVersion": "5.0.0",
+        "frameVersions": [
+          2
+        ],
+        "features": [],
+        "mteProfile": "mte/4.2.1+mke+kyber1024/a1b2c3d4e5f60718",
+        "kyberStrength": 1024,
+        "sequenceWindow": -63,
+        "timeWindow": 1000,
+        "maxFrameBytes": 1048576,
+        "maxMessageBytes": 1048576,
+        "maxMetadataBytes": {
+          "MKE": 61439,
+          "MTE": 61439
+        },
+        "transports": [
+          "http"
+        ]
+      }
+    },
+    {
+      "name": "unknown_members",
+      "note": "A document from a later relay major version. A parser has to ignore members it does not know and read the ones it does, or every future addition breaks every shipped client. This is the forward compatibility the versioning policy rests on.",
+      "document": {
+        "discoverySchema": 1,
+        "buildVersion": "7.0.0",
+        "frameVersions": [
+          2
+        ],
+        "features": [],
+        "mteProfile": "mte/4.2.1+mke+kyber1024/a1b2c3d4e5f60718",
+        "kyberStrength": 1024,
+        "sequenceWindow": -63,
+        "timeWindow": 1000,
+        "maxFrameBytes": 1048576,
+        "maxMessageBytes": 1048576,
+        "maxMetadataBytes": {
+          "MKE": 61439,
+          "MTE": 61439
+        },
+        "transports": [
+          "http"
+        ],
+        "someMemberFromALaterGeneration": {
+          "nested": [
+            1,
+            2,
+            3
+          ]
+        },
+        "anotherUnknownMember": "ignored"
+      }
+    },
+    {
+      "name": "zero_windows",
+      "note": "The two pairing inputs at zero, which is where they disagree on purpose. A zero timeWindow is not adopted: it is a legal window and also the Go zero value a server sends when the block that fills it did not run, the wire cannot tell those apart, and only one reading is safe. Falling back to 1000 pairs with a server that meant 1000; adopting a spurious zero pairs with nothing and says nothing about why. A zero sequenceWindow is adopted, because every client already adopts any integer there and the default is minus 63, so a zero is the less likely accident. Both servers now seed both members with the values they would use, so neither zero should reach a client from a build in this workspace; this document pins what happens if one does.",
+      "document": {
+        "discoverySchema": 1,
+        "buildVersion": "5.0.0",
+        "frameVersions": [
+          2
+        ],
+        "features": [],
+        "mteProfile": "mte/4.2.1+mke+kyber1024/a1b2c3d4e5f60718",
+        "kyberStrength": 1024,
+        "sequenceWindow": 0,
+        "timeWindow": 0,
+        "maxFrameBytes": 1048576,
+        "maxMessageBytes": 1048576,
+        "maxMetadataBytes": {
+          "MKE": 61439,
+          "MTE": 61439
+        },
+        "transports": [
+          "http"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+rootProject.name = "Relay"
+include ':relay'
+include ':wire'
+
+// Dev-only composite build: when the mte-client source is checked out alongside
+// this repo, build against it. When it isn't (CI without the sibling, or once we
+// consume dependencies from public sources), this is skipped and the declared
+// 'com.eclypses:mte-client-android' artifact is resolved from the configured repos.
+if (file('../mte-client-android').exists()) {
+    includeBuild('../mte-client-android') {
+        dependencySubstitution {
+            substitute module('com.eclypses:mte-client-android') using project(':mte')
+        }
+    }
+}

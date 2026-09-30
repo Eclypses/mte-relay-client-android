@@ -1,0 +1,308 @@
+{
+  "_": "The personalization grammar of spec/frame-v2.md section 11, as data. Both strings of a pair are checked and not one, because the server's encoder takes the client's decoder string. Every case here is a rule that was found missing or found wrong rather than a rule that was already held: the randomness floor was measured on the whole string, which let one random character pass behind a long host, and the byte cap was measured in UTF-16 code units on the browser side. Transports are the three names wire.Transport prints. The Go side drives conn.PersonalizationPrefix and conn.ValidPersonalization from spec/conformance; the TypeScript side drives src/protocol/personalization.ts. Regenerate with gen_personalization.py.",
+  "grammar": {
+    "version": 2,
+    "randomness_min": 22,
+    "max_bytes": 1024,
+    "_": "randomness_min counts characters of the randomness SEGMENT, which ends at the first slash after the prefix. max_bytes counts UTF-8 bytes of the whole string, never UTF-16 code units."
+  },
+  "prefixes": [
+    {
+      "transport": "http",
+      "prefix": "mte-relay/2/http/"
+    },
+    {
+      "transport": "ws",
+      "prefix": "mte-relay/2/ws/"
+    },
+    {
+      "transport": "tcp",
+      "prefix": "mte-relay/2/tcp/"
+    }
+  ],
+  "_pad": "A case carrying a pad appends char, count times, to value before anything is measured. It is there so a 1024 byte fixture is one readable line rather than one unreadable one.",
+  "_errors": "prefix: the string does not begin with this transport's prefix. randomness: the randomness segment is under the floor. too_large: over the byte cap. control: a byte under 0x20, or 0x7f, anywhere in the string. A case names the first failure and not every failure, so the order of the checks is pinned as well as the checks themselves.",
+  "_known_gap": "The grammar writes randomness as 22 or more characters of [A-Za-z0-9_-]. Neither implementation checks the alphabet, and both measure the floor in bytes, so 11 two byte characters clear it. The two agree, so no pair fails over it, and the cases above pin the behaviour that exists rather than the one the grammar describes. Closing it means an alphabet check landing in conn/pairing.go and in personalization.ts in the same change, because a floor one end enforces and the other does not is a pair that cannot be made.",
+  "cases": [
+    {
+      "name": "the shortest legal ws string",
+      "transport": "ws",
+      "value": "mte-relay/2/ws/AAAAAAAAAAAAAAAAAAAAAA"
+    },
+    {
+      "name": "randomness and a host",
+      "transport": "ws",
+      "value": "mte-relay/2/ws/AAAAAAAAAAAAAAAAAAAAAA/relay.example.com"
+    },
+    {
+      "name": "the shortest legal http string",
+      "transport": "http",
+      "value": "mte-relay/2/http/AAAAAAAAAAAAAAAAAAAAAA"
+    },
+    {
+      "name": "the shortest legal tcp string",
+      "transport": "tcp",
+      "value": "mte-relay/2/tcp/AAAAAAAAAAAAAAAAAAAAAA"
+    },
+    {
+      "name": "base64url randomness uses the whole alphabet",
+      "transport": "ws",
+      "value": "mte-relay/2/ws/aA0_-zZ9aA0_-zZ9aA0_-z/relay.example.com"
+    },
+    {
+      "name": "a host with its own slashes, the segment still ends at the first",
+      "transport": "ws",
+      "value": "mte-relay/2/ws/AAAAAAAAAAAAAAAAAAAAAA/a/b/c"
+    },
+    {
+      "name": "an empty host segment after the randomness",
+      "transport": "ws",
+      "value": "mte-relay/2/ws/AAAAAAAAAAAAAAAAAAAAAA/"
+    },
+    {
+      "name": "a non ascii host is not a control character",
+      "transport": "ws",
+      "value": "mte-relay/2/ws/AAAAAAAAAAAAAAAAAAAAAA/münchen.example"
+    },
+    {
+      "name": "a port in the host",
+      "transport": "ws",
+      "value": "mte-relay/2/ws/AAAAAAAAAAAAAAAAAAAAAA/relay.example.com:8443"
+    },
+    {
+      "name": "a ws string offered on http",
+      "transport": "http",
+      "value": "mte-relay/2/ws/AAAAAAAAAAAAAAAAAAAAAA/relay.example.com",
+      "error": "prefix"
+    },
+    {
+      "name": "a ws string offered on tcp",
+      "transport": "tcp",
+      "value": "mte-relay/2/ws/AAAAAAAAAAAAAAAAAAAAAA/relay.example.com",
+      "error": "prefix"
+    },
+    {
+      "name": "an http string offered on ws",
+      "transport": "ws",
+      "value": "mte-relay/2/http/AAAAAAAAAAAAAAAAAAAAAA/relay.example.com",
+      "error": "prefix"
+    },
+    {
+      "name": "a tcp string offered on ws",
+      "transport": "ws",
+      "value": "mte-relay/2/tcp/AAAAAAAAAAAAAAAAAAAAAA/relay.example.com",
+      "error": "prefix"
+    },
+    {
+      "name": "an http string offered on tcp",
+      "transport": "tcp",
+      "value": "mte-relay/2/http/AAAAAAAAAAAAAAAAAAAAAA",
+      "error": "prefix"
+    },
+    {
+      "name": "the frame version 1 prefix",
+      "transport": "ws",
+      "value": "mte-relay/1/ws/AAAAAAAAAAAAAAAAAAAAAA",
+      "error": "prefix"
+    },
+    {
+      "name": "no version segment at all",
+      "transport": "ws",
+      "value": "mte-relay/ws/AAAAAAAAAAAAAAAAAAAAAA",
+      "error": "prefix"
+    },
+    {
+      "name": "no prefix at all",
+      "transport": "ws",
+      "value": "AAAAAAAAAAAAAAAAAAAAAA",
+      "error": "prefix"
+    },
+    {
+      "name": "the empty string",
+      "transport": "ws",
+      "value": "",
+      "error": "prefix"
+    },
+    {
+      "name": "the prefix without its trailing slash",
+      "transport": "ws",
+      "value": "mte-relay/2/wsAAAAAAAAAAAAAAAAAAAAAA",
+      "error": "prefix"
+    },
+    {
+      "name": "a longer transport name that starts with this one",
+      "transport": "ws",
+      "value": "mte-relay/2/wss/AAAAAAAAAAAAAAAAAAAAAA",
+      "error": "prefix"
+    },
+    {
+      "name": "the prefix in the middle rather than at the start",
+      "transport": "ws",
+      "value": "x/mte-relay/2/ws/AAAAAAAAAAAAAAAAAAAAAA",
+      "error": "prefix"
+    },
+    {
+      "name": "the prefix alone",
+      "transport": "ws",
+      "value": "mte-relay/2/ws/",
+      "error": "randomness"
+    },
+    {
+      "name": "one character under the floor",
+      "transport": "ws",
+      "value": "mte-relay/2/ws/AAAAAAAAAAAAAAAAAAAAA",
+      "error": "randomness"
+    },
+    {
+      "name": "one character under the floor with a host",
+      "transport": "ws",
+      "value": "mte-relay/2/ws/AAAAAAAAAAAAAAAAAAAAA/relay.example.com",
+      "error": "randomness"
+    },
+    {
+      "name": "the defect: one random character behind a long host",
+      "transport": "ws",
+      "value": "mte-relay/2/ws/A/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.example.com",
+      "error": "randomness"
+    },
+    {
+      "name": "the defect: no random characters behind a long host",
+      "transport": "ws",
+      "value": "mte-relay/2/ws//aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.example.com",
+      "error": "randomness"
+    },
+    {
+      "name": "the defect: the whole string clears the floor and the segment does not",
+      "transport": "http",
+      "value": "mte-relay/2/http/xy/relay.example.com",
+      "error": "randomness"
+    },
+    {
+      "name": "a multibyte randomness segment clears the floor on byte count, because the alphabet is not checked",
+      "transport": "ws",
+      "value": "mte-relay/2/ws/ééééééééééé"
+    },
+    {
+      "name": "eleven two byte characters is one byte under the floor",
+      "transport": "ws",
+      "value": "mte-relay/2/ws/ééééééééééa",
+      "error": "randomness"
+    },
+    {
+      "name": "exactly the byte cap",
+      "transport": "ws",
+      "value": "mte-relay/2/ws/AAAAAAAAAAAAAAAAAAAAAA/",
+      "pad": {
+        "char": "a",
+        "count": 986
+      }
+    },
+    {
+      "name": "one byte over the cap",
+      "transport": "ws",
+      "value": "mte-relay/2/ws/AAAAAAAAAAAAAAAAAAAAAA/",
+      "pad": {
+        "char": "a",
+        "count": 987
+      },
+      "error": "too_large"
+    },
+    {
+      "name": "exactly the byte cap in two byte characters",
+      "transport": "ws",
+      "value": "mte-relay/2/ws/AAAAAAAAAAAAAAAAAAAAAA/",
+      "pad": {
+        "char": "é",
+        "count": 493
+      }
+    },
+    {
+      "name": "the utf16 trap: two byte characters, 538 code units and 1038 bytes",
+      "transport": "ws",
+      "value": "mte-relay/2/ws/AAAAAAAAAAAAAAAAAAAAAA/",
+      "pad": {
+        "char": "é",
+        "count": 500
+      },
+      "error": "too_large"
+    },
+    {
+      "name": "the utf16 trap: astral characters, 538 code units and 1038 bytes",
+      "transport": "ws",
+      "value": "mte-relay/2/ws/AAAAAAAAAAAAAAAAAAAAAA/",
+      "pad": {
+        "char": "𝄞",
+        "count": 250
+      },
+      "error": "too_large"
+    },
+    {
+      "name": "the cap is checked before the prefix",
+      "transport": "ws",
+      "value": "mte-relay/2/http/AAAAAAAAAAAAAAAAAAAAAA/",
+      "pad": {
+        "char": "a",
+        "count": 1024
+      },
+      "error": "too_large"
+    },
+    {
+      "name": "a newline in the host",
+      "transport": "ws",
+      "value": "mte-relay/2/ws/AAAAAAAAAAAAAAAAAAAAAA/relay\nexample.com",
+      "error": "control"
+    },
+    {
+      "name": "a carriage return in the host",
+      "transport": "ws",
+      "value": "mte-relay/2/ws/AAAAAAAAAAAAAAAAAAAAAA/relay\rexample.com",
+      "error": "control"
+    },
+    {
+      "name": "a nul in the host",
+      "transport": "ws",
+      "value": "mte-relay/2/ws/AAAAAAAAAAAAAAAAAAAAAA/relay\u0000example.com",
+      "error": "control"
+    },
+    {
+      "name": "a tab in the host",
+      "transport": "ws",
+      "value": "mte-relay/2/ws/AAAAAAAAAAAAAAAAAAAAAA/relay\texample.com",
+      "error": "control"
+    },
+    {
+      "name": "a del in the host",
+      "transport": "ws",
+      "value": "mte-relay/2/ws/AAAAAAAAAAAAAAAAAAAAAA/relayexample.com",
+      "error": "control"
+    },
+    {
+      "name": "a control character inside a randomness segment that is otherwise long enough",
+      "transport": "ws",
+      "value": "mte-relay/2/ws/AAAAAAAAAAAAAAAAAAAAA\u0001",
+      "error": "control"
+    },
+    {
+      "name": "randomness is checked before control characters",
+      "transport": "ws",
+      "value": "mte-relay/2/ws/AA\u0001",
+      "error": "randomness"
+    },
+    {
+      "name": "the prefix is checked before control characters",
+      "transport": "ws",
+      "value": "mte-relay/2/tcp/AAAAAAAAAAAAAAAAAAAAAA/relay\nexample.com",
+      "error": "prefix"
+    }
+  ],
+  "minted": {
+    "_": "A generator must produce a string its own validator accepts for the transport it was minted for and refuses on the other two. That is the property the prefix exists for and the one a generator can get wrong without any single case above catching it. Only the TypeScript side drives this: the Go generator is unexported in conn and the exported surface is the validator alone.",
+    "hosts": [
+      "",
+      "relay.example.com",
+      "münchen.example",
+      "relay.example.com:8443"
+    ],
+    "iterations": 64
+  }
+}

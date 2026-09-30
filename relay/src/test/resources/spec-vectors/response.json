@@ -1,0 +1,10 @@
+[
+  {"name": "200 with 3 byte metadata", "hex": "00c800000003010203", "expect": {"status": 200, "metadata": "010203"}},
+  {"name": "101 upgrade accepted", "hex": "00650000000101", "expect": {"status": 101, "metadata": "01"}},
+  {"name": "204 one frame", "hex": "00cc00000002aabb", "expect": {"status": 204, "metadata": "aabb"}},
+  {"name": "status 0", "hex": "000000000001aa", "error": "payload"},
+  {"name": "status 600", "hex": "025800000001aa", "error": "payload"},
+  {"name": "empty metadata", "hex": "00c800000000", "error": "payload"},
+  {"name": "trailing byte", "hex": "00c800000001aabb", "error": "payload"},
+  {"name": "too short", "hex": "00c8000000", "error": "payload"}
+]
